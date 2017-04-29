@@ -1,7 +1,8 @@
 from flask import Flask, abort, jsonify, make_response, render_template, request
 from flask_cors import CORS, cross_origin
 import base64
-
+import zlib
+import requests
 
 
 app = Flask(__name__)
@@ -77,25 +78,26 @@ def not_found(error):
 
 
 def deflate_and_base64_encode(string_val):
-    '''
+    """
     
     :param string_val: 
     :return: 
-    '''
+    """
+
     zlibbed_str = zlib.compress(string_val)
     compressed_string = zlibbed_str[2:-4]
     return base64.b64encode(compressed_string)
 
 def createRights(token):
-    '''
+    """
     Create the rights of owning the moving with the given token
     :param token: 
     :return: 
-    '''
+    """
 
     template = 'flixster_redirect.html'
 
-    #Create the rights with the token
+    # Create the rights with the token
     headers = {
         'accept': 'application/xml',
         'authorization': 'UVGS uvgs_clientid=UV_ERICSSON,uvgs_accesskey=kRvoUwPdIqukswRhBXIfwmhd2zmnKIuRR90MC0SuWbUl9ZuGNUlBebZEytpXB506jHM4weYGiMhJOzjHEALkNC1i6N46u84Pl8IV7VkVJsRkjDwsM8iL1B2rcPZsrr7v',
@@ -133,7 +135,8 @@ def createRights(token):
            '            <displayName>Pan</displayName>' \
            '    </soldAs>' \
            '    <streamWebLoc>' \
-           '        <location>https://www.flixstervideo.com/swl/urn:dece:cid:eidr-s:67B0-2137-1A59-BC25-9EC3-3</location>' \
+           '        <location>https://www.flixstervideo.com/swl/' \
+           '            urn:dece:cid:eidr-s:67B0-2137-1A59-BC25-9EC3-3</location>' \
            '    </streamWebLoc>' \
            '</rightsToken>' \
            '</rightsTokenCreationRequest>'
@@ -144,12 +147,10 @@ def createRights(token):
 
     print "POST /rightstoken status code: %s" % r.status_code
 
-
     if r.status_code == 201:
         template = 'flixster_redirect.html'
 
     return render_template(template)
-
 
 
 if __name__ == '__main__':
