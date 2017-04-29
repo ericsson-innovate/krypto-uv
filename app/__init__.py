@@ -34,7 +34,6 @@ def test_flixster():
     return render_template('flixster_redirect.html')
 
 
-
 @app.route('/auth', methods=['POST'])
 def auth():
     print "/auth"
@@ -48,21 +47,21 @@ def auth():
     # HTML template to render depending on the result of the authentication
     # a rights creation
 
+    response = {'status': 'FAILED'}
 
     if status == "success":
         '''base64 decode'''
         decodedSamlAssertion = base64.b64decode(samlAssertion)
 
-        #print "Decoded %s" % decodedSamlAssertion
+        # print "Decoded %s" % decodedSamlAssertion
 
         token = deflate_and_base64_encode(decodedSamlAssertion)
 
         createRights(token)
-    else:
-        template = 'flixster_redirect.html'
-        return render_template(template)
 
+        response = {'status': 'OK'}
 
+    return jsonify(response)
 
 
 @app.errorhandler(400)
@@ -88,14 +87,13 @@ def deflate_and_base64_encode(string_val):
     compressed_string = zlibbed_str[2:-4]
     return base64.b64encode(compressed_string)
 
+
 def createRights(token):
     """
     Create the rights of owning the moving with the given token
     :param token: 
     :return: 
     """
-
-    template = 'flixster_redirect.html'
 
     # Create the rights with the token
     headers = {
@@ -148,9 +146,8 @@ def createRights(token):
     print "POST /rightstoken status code: %s" % r.status_code
 
     if r.status_code == 201:
-        template = 'flixster_redirect.html'
+        print "send an event here"
 
-    return render_template(template)
 
 
 if __name__ == '__main__':
