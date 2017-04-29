@@ -47,7 +47,7 @@ def auth():
     # HTML template to render depending on the result of the authentication
     # a rights creation
 
-    response = {'status': 'FAILED'}
+    template = "flixster_redirect.html"
 
     if status == "success":
         '''base64 decode'''
@@ -57,11 +57,13 @@ def auth():
 
         token = deflate_and_base64_encode(decodedSamlAssertion)
 
-        createRights(token)
+        created = createRights(token)
 
-        response = {'status': 'OK'}
+        if created is True:
+            template = "flixster_redirect.html"
 
-    return jsonify(response)
+    # return jsonify(response)
+    return render_template(template)
 
 
 @app.errorhandler(400)
@@ -145,10 +147,12 @@ def createRights(token):
 
     print "POST /rightstoken status code: %s" % r.status_code
 
+    rights_created = False
+
     if r.status_code == 201:
-        print "send an event here"
+        rights_created = True
 
-
+    return rights_created
 
 if __name__ == '__main__':
     app.run(debug=True)
